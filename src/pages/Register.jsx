@@ -1,4 +1,3 @@
-// Register.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api/axios';
@@ -15,6 +14,7 @@ export default function Register() {
     email: '',
     pwd: ''
   });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = e => {
@@ -23,12 +23,32 @@ export default function Register() {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    const { user_name, email, pwd } = form;
+
+    if (!user_name || !email || !pwd) return alert('Por favor completa todos los campos.');
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return alert('Correo inválido.');
+
+    if (pwd.length < 6) return alert('La contraseña debe tener al menos 6 caracteres.');
+
     try {
+      setLoading(true);
+
       await api.post('/auth/register', form);
-      alert('Usuario registrado con éxito');
-      navigate('/login');
+
+      const loginRes = await api.post('/auth/login', { email, pwd });
+      localStorage.setItem('token', loginRes.data.token);
+
+      // Manejo de usuario
+      const user = loginRes.data.user || JSON.parse(atob(loginRes.data.token.split('.')[1]));
+      localStorage.setItem('user', JSON.stringify(user));
+
+      navigate('/rooms');
     } catch (err) {
-      alert(err.response?.data.error || 'Error al registrar');
+      alert(err.response?.data?.error || 'Error al registrar');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,6 +65,7 @@ export default function Register() {
           margin="normal"
           value={form.user_name}
           onChange={handleChange}
+          disabled={loading}
         />
         <TextField
           fullWidth
@@ -54,6 +75,7 @@ export default function Register() {
           margin="normal"
           value={form.email}
           onChange={handleChange}
+          disabled={loading}
         />
         <TextField
           fullWidth
@@ -63,14 +85,16 @@ export default function Register() {
           margin="normal"
           value={form.pwd}
           onChange={handleChange}
+          disabled={loading}
         />
         <Button
           fullWidth
           variant="contained"
           type="submit"
           sx={{ mt: 2 }}
+          disabled={loading}
         >
-          Registrarse
+          {loading ? 'Creando cuenta...' : 'Registrarse'}
         </Button>
       </form>
       <Typography variant="body2" sx={{ mt: 2 }}>

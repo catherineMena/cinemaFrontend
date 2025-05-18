@@ -1,4 +1,3 @@
-// src/pages/ScheduleForm.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from "../../api/axios";
@@ -12,7 +11,9 @@ export default function ScheduleForm() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.get('/rooms').then(res => setRooms(res.data));
+    api.get('/rooms')
+      .then(res => setRooms(res.data))
+      .catch(() => alert("Error al cargar las salas"));
   }, []);
 
   const handleChange = e => {
@@ -22,8 +23,8 @@ export default function ScheduleForm() {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      await api.post('/schedules', form);
-      alert('Horario agregado correctamente');
+      await api.post('/schedules', form); // Envía id_cinema, date y time
+      alert('Horario y asientos creados correctamente');
       navigate('/rooms');
     } catch (err) {
       alert(err.response?.data?.error || 'Error al crear horario');

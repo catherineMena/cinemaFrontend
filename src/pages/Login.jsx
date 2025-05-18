@@ -17,14 +17,19 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
 export default function Login() {
   const [email, setEmail] = useState('');
-  const [pwd, setPwd]     = useState('');
-  const navigate           = useNavigate();
+  const [pwd, setPwd] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async e => {
     e.preventDefault();
     try {
       const { data } = await api.post('/auth/login', { email, pwd });
+
+      console.log("Usuario logueado:", data.user); // 👈 Para debug
+
       localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
       navigate('/rooms');
     } catch (err) {
       alert(err.response?.data.error || 'Error al iniciar sesión');
@@ -33,16 +38,16 @@ export default function Login() {
 
   return (
     <Box
-         sx={{
-          minHeight: '100vh',
-          width: '100vw',            // <— ocupar todo el ancho
+      sx={{
+        minHeight: '100vh',
+        width: '100vw',
         backgroundColor: '#f0f2f5',
-      display: 'flex',
-           alignItems: 'center',
-           justifyContent: 'center', // <— centrar horizontalmente
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         p: 2
-         }}
-   >
+      }}
+    >
       <Card sx={{ maxWidth: 400, width: '100%', boxShadow: 3 }}>
         <CardContent>
           <Box

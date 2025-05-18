@@ -1,5 +1,6 @@
+// src/pages/ScheduleList.jsx
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import {
   Container,
@@ -12,6 +13,7 @@ export default function ScheduleList() {
   const { id } = useParams(); // ID de la sala
   const [schedules, setSchedules] = useState([]);
   const [room, setRoom] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     api.get('/rooms').then(res => {
@@ -25,9 +27,9 @@ export default function ScheduleList() {
     });
   }, [id]);
 
-  const handleSelect = schedule => {
-    alert(`Horario seleccionado: ${schedule.date} ${schedule.time} (ID: ${schedule.id})`);
-    // Aquí podés guardar el horario en estado global, contexto o redirigir a butacas
+  const handleSelect = (schedule) => {
+    // Redirige a /seats/scheduleId y pasa todo el objeto schedule
+    navigate(`/seats/${schedule.id}`, { state: { schedule } });
   };
 
   return (
